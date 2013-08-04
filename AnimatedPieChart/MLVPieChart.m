@@ -1,13 +1,13 @@
 //
-//  MLVViewController.h
+//  MLVPieChart.m
 //  AnimatedPieChart
 //
 //  Created by Lance Velasco on 8/4/13.
 //  Copyright (c) 2013 MLV Group. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import "MLVPieChart.h"
 
-@interface MLVViewController : UIViewController
+@implementation MLVPieChart
 
 @end

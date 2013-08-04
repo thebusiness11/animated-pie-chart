@@ -18,6 +18,9 @@
 		4044938817AEBCCF00D0452E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4044938717AEBCCF00D0452E /* Default-568h@2x.png */; };
 		4044938B17AEBCCF00D0452E /* MLVViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4044938A17AEBCCF00D0452E /* MLVViewController.m */; };
 		4044938E17AEBCD000D0452E /* MLVViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4044938C17AEBCCF00D0452E /* MLVViewController.xib */; };
+		4044939717AEBEBA00D0452E /* MLVPieChart.m in Sources */ = {isa = PBXBuildFile; fileRef = 4044939617AEBEBA00D0452E /* MLVPieChart.m */; };
+		4044939A17AEBECE00D0452E /* MLVPieSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 4044939917AEBECE00D0452E /* MLVPieSlice.m */; };
+		40FF63C917AF11D800BDDBB8 /* MLVPieChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 40FF63C817AF11D800BDDBB8 /* MLVPieChartView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +40,12 @@
 		4044938917AEBCCF00D0452E /* MLVViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLVViewController.h; sourceTree = "<group>"; };
 		4044938A17AEBCCF00D0452E /* MLVViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLVViewController.m; sourceTree = "<group>"; };
 		4044938D17AEBCD000D0452E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MLVViewController.xib; sourceTree = "<group>"; };
+		4044939517AEBEBA00D0452E /* MLVPieChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLVPieChart.h; sourceTree = "<group>"; };
+		4044939617AEBEBA00D0452E /* MLVPieChart.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLVPieChart.m; sourceTree = "<group>"; };
+		4044939817AEBECE00D0452E /* MLVPieSlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLVPieSlice.h; sourceTree = "<group>"; };
+		4044939917AEBECE00D0452E /* MLVPieSlice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLVPieSlice.m; sourceTree = "<group>"; };
+		40FF63C717AF11D800BDDBB8 /* MLVPieChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLVPieChartView.h; sourceTree = "<group>"; };
+		40FF63C817AF11D800BDDBB8 /* MLVPieChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLVPieChartView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +92,7 @@
 		4044937717AEBCCF00D0452E /* AnimatedPieChart */ = {
 			isa = PBXGroup;
 			children = (
+				4044939417AEBE9500D0452E /* PieChart */,
 				4044938017AEBCCF00D0452E /* MLVAppDelegate.h */,
 				4044938117AEBCCF00D0452E /* MLVAppDelegate.m */,
 				4044938917AEBCCF00D0452E /* MLVViewController.h */,
@@ -105,6 +115,19 @@
 				4044938717AEBCCF00D0452E /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4044939417AEBE9500D0452E /* PieChart */ = {
+			isa = PBXGroup;
+			children = (
+				4044939517AEBEBA00D0452E /* MLVPieChart.h */,
+				4044939617AEBEBA00D0452E /* MLVPieChart.m */,
+				4044939817AEBECE00D0452E /* MLVPieSlice.h */,
+				4044939917AEBECE00D0452E /* MLVPieSlice.m */,
+				40FF63C717AF11D800BDDBB8 /* MLVPieChartView.h */,
+				40FF63C817AF11D800BDDBB8 /* MLVPieChartView.m */,
+			);
+			name = PieChart;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,6 +200,9 @@
 				4044937E17AEBCCF00D0452E /* main.m in Sources */,
 				4044938217AEBCCF00D0452E /* MLVAppDelegate.m in Sources */,
 				4044938B17AEBCCF00D0452E /* MLVViewController.m in Sources */,
+				4044939717AEBEBA00D0452E /* MLVPieChart.m in Sources */,
+				4044939A17AEBECE00D0452E /* MLVPieSlice.m in Sources */,
+				40FF63C917AF11D800BDDBB8 /* MLVPieChartView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,6 +325,7 @@
 				4044939317AEBCD000D0452E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

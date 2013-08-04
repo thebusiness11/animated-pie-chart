@@ -1,5 +1,5 @@
 //
-//  MLVViewController.h
+//  MLVPieChartView.h
 //  AnimatedPieChart
 //
 //  Created by Lance Velasco on 8/4/13.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MLVViewController : UIViewController
+@interface MLVPieChartView : UIView
 
 @end
