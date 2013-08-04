@@ -9,7 +9,16 @@
 #import "MLVPieChartView.h"
 #import "MLVPieSlice.h" 
 
+typedef enum
+{
+    STATE_IDLE,
+    STATE_ROTATING,
+    STATE_SEPARATING,
+    STATE_SEPARATED,
+    STATE_JOINING
+}   state;
 
+;
 
 @implementation MLVPieChartView
 
