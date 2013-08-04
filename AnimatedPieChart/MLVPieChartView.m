@@ -9,6 +9,8 @@
 #import "MLVPieChartView.h"
 #import "MLVPieSlice.h" 
 
+
+
 @implementation MLVPieChartView
 
 {
@@ -27,7 +29,7 @@
         xPos = 320/2;
         yPos = 330;
         radius = 120;
-        rotationAngle = 0;
+        rotationAngle = 4;
     }
     return self;
 }
