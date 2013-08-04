@@ -15,6 +15,6 @@
 @property NSString *description;
 @property NSString *color;
 
-- (id) initWithPercent:(float) pctr andTitle:(NSString *)title andDescription:(NSString *) description andColor:(NSString *) color;
+- (id) initWithPercent:(float) pct andTitle:(NSString *)title andDescription:(NSString *)description andColor:(NSString *)color;
 
 @end

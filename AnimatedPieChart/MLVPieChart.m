@@ -15,7 +15,7 @@
 - (id) init
 {
     self = [super init];
-    if (slef) {
+    if (self) {
         self.title = @"Smartphone Market Share";
         self.slices = [[NSMutableArray alloc] init];
         [self.slices addObject: [[MLVPieSlice alloc] initWithPercent:20 andTitle:@"iOS" andDescription:@"iPhone by Apple" andColor:@"B070B0"]];

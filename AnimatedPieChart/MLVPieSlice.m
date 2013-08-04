@@ -10,4 +10,17 @@
 
 @implementation MLVPieSlice
 
+- (id) initWithPercent:(float) pct andTitle:(NSString *)title andDescription:(NSString *) description andColor:(NSString *) color
+{
+    self = [super init];
+    if (self) {
+        self.pct = pct;
+        self.title = title;
+        self.description = description;
+        self.color = color;
+    }
+    return self;
+}
+
+
 @end
