@@ -10,4 +10,11 @@
 
 @interface MLVPieSlice : NSObject
 
+@property float pct;
+@property NSString *title;
+@property NSString *description;
+@property NSString *color;
+
+- (id) initWithPercent:(float) pctr andTitle:(NSString *)title andDescription:(NSString *) description andColor:(NSString *) color;
+
 @end
