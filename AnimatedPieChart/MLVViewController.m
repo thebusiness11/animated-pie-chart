@@ -25,7 +25,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    pieChartView = [[[MLVPieChartView alloc] initWithFrame: self.view.frame];
+    pieChartView = [[MLVPieChartView alloc] initWithFrame: self.view.frame];
                     [self.view addSubview:pieChartView];
     
 }

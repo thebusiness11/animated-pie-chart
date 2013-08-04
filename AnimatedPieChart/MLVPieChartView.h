@@ -13,4 +13,6 @@
 
 @property MLVPieChart *pieChart;
 
++ (UIColor *)colorFromHexString:(NSString *)hexString;
+
 @end
