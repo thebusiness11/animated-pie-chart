@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLVPieChart.h" 
 
 @interface MLVPieChartView : UIView
+
+@property MLVPieChart *pieChart;
 
 @end
