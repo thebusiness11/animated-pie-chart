@@ -10,4 +10,8 @@
 
 @interface MLVPieChart : NSObject
 
+@property NSString *title;
+@property NSMutableArray *slices;
+
+
 @end
