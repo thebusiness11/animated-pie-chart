@@ -13,9 +13,8 @@
 @interface MLVViewController ()
 {
     MLVPieChartView *pieChartView;
+    NSTimer *timer;
 }
-
-
 @end
 
 @implementation MLVViewController
@@ -28,6 +27,14 @@
     pieChartView = [[MLVPieChartView alloc] initWithFrame: self.view.frame];
                     [self.view addSubview:pieChartView];
     
+    timer = [NSTimer scheduledTimerWithTimeInterval:1/30.0 target:self selector:@selector(nextFrame) userInfo:NULL repeats:YES];
+             
+}
+
+- (void) nextFrame
+{
+//    [pieChartView tick];
+    [pieChartView setNeedsDisplay];
 }
 
 - (void)didReceiveMemoryWarning

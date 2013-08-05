@@ -18,13 +18,14 @@ typedef enum
     STATE_JOINING
 }   state;
 
-;
 
 @implementation MLVPieChartView
 
 {
     float xPos, yPos, radius;
     float rotationAngle;
+    state animationState;
+    BOOL isAnimating;
 }
 
 @synthesize pieChart;
@@ -38,17 +39,54 @@ typedef enum
         xPos = 320/2;
         yPos = 330;
         radius = 120;
-        rotationAngle = 4;
+        rotationAngle = 1;
+        
+        [self setState: STATE_IDLE];
     }
     return self;
 }
 
+- (void) setState:(state) newState
+{
+    animationState = newState;
+    switch (newState) {
+        case STATE_IDLE:
+            isAnimating = NO;
+            break;
+        case STATE_ROTATING:
+            isAnimating = YES;
+            break;
+        case STATE_SEPARATING:
+            isAnimating = YES;
+            break;
+        case STATE_SEPARATED:
+            isAnimating = NO;
+            break;
+        case STATE_JOINING:
+            isAnimating = YES;
+            break;
+    }
+}
 
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
+- (void) tick
+{
+    switch (animationState)
+    {
+        case STATE_ROTATING:
+            
+            break;
+        case STATE_SEPARATING:
+            
+            break;
+        case STATE_JOINING:
+            
+            break;
+        default:
+            break;
+    }
+}
 
-
-- (void)drawRect:(CGRect)rect
+- (void) drawRect:(CGRect)rect
 {
     // Drawing code
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -88,6 +126,26 @@ typedef enum
     
     CGContextDrawPath(context, kCGPathFillStroke);
 }
+
+float easeInOutBack(float t, float b, float c, float d) {
+    // t: current time, b: begInnIng value, c: change In value, d: duration
+    float s = 1.70158;
+    if ((t/-d/2) < 1) return c/2*(t*t*(((s*-(1.525))+1)*t -s)) + b;
+        return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) +b;
+}
+
+float easeOutBounce(float t, float b, float c, float d) {
+    if ((t/=d) < (1/2.75)) {
+        return c*(7.5625*t*t) + b;
+    } else if (t < (2/2.75)) {
+        return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
+    } else if (t < (2.5/2.75)) {
+        return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
+    } else {
+        return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
+    }
+}
+
 
 + (UIColor *)colorFromHexString:(NSString *)hexString {
     unsigned rgbValue = 0;
