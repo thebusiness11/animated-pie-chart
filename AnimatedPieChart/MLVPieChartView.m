@@ -26,6 +26,16 @@ typedef enum
     float rotationAngle;
     state animationState;
     BOOL isAnimating;
+    
+    float startAngle;   //starting angle for rotation
+    float destAngle;    //ending angle for rotation
+    
+    MLVPieSlice *selectedSlice;
+    MLVPieSlice *nextSelectedSlice;
+    float selectionYPos;
+    
+    int totalAnimFrames;
+    int currentFrame;
 }
 
 @synthesize pieChart;
@@ -39,7 +49,9 @@ typedef enum
         xPos = 320/2;
         yPos = 330;
         radius = 120;
-        rotationAngle = 1;
+        rotationAngle = 0;
+        startAngle = destAngle = 0;
+        nextSelectedSlice = nil;
         
         [self setState: STATE_IDLE];
     }
@@ -55,6 +67,8 @@ typedef enum
             break;
         case STATE_ROTATING:
             isAnimating = YES;
+            totalAnimFrames = 20;
+            currentFrame = 1;
             break;
         case STATE_SEPARATING:
             isAnimating = YES;
@@ -73,7 +87,16 @@ typedef enum
     switch (animationState)
     {
         case STATE_ROTATING:
-            
+            if (currentFrame > totalAnimFrames)
+            {
+                startAngle = rotationAngle = destAngle;
+                [self setState: STATE_IDLE];
+            }
+            else
+            {
+                //t:current time b: beginning value c: change in value d: duration
+                rotationAngle = easeInOutBack(currentFrame++, startAngle, (destAngle - startAngle), totalAnimFrames);
+            }
             break;
         case STATE_SEPARATING:
             
@@ -109,9 +132,10 @@ typedef enum
 }
 
 
-- (void) drawPieSlice:(MLVPieSlice *) slice withStartingAngle:(float)startAngle withContext:(CGContextRef) context
+- (void) drawPieSlice:(MLVPieSlice *) slice withStartingAngle:(float)startingAngle withContext:(CGContextRef) context
 {
-    float endAngle = startAngle + (slice.pct / 100) * (M_PI * 2);
+    float endAngle = startingAngle + (slice.pct / 100) * (M_PI*2);
+
     float adjY = yPos;
     float rad = radius;
     
@@ -121,19 +145,67 @@ typedef enum
     
     CGContextBeginPath(context);
     CGContextMoveToPoint(context, xPos, adjY);
-    CGContextAddArc(context, xPos, adjY, rad, startAngle, endAngle, 0);
+    CGContextAddArc(context, xPos, adjY, rad, startingAngle, endAngle, 0);
     CGContextClosePath(context);
     
     CGContextDrawPath(context, kCGPathFillStroke);
 }
 
+- (void) touchedPoint:(CGPoint)point
+{
+    if (isAnimating) return;
+    
+    float a = [self getAngleFromPoint: point];
+    if (a < 0)
+        a += 2*M_PI;
+    
+    //determine which slice was touched
+    float first = startAngle;
+    float last;
+    MLVPieSlice *slice;
+    for (slice in pieChart.slices) {
+        last = first + (slice.pct/100) * (M_PI *2);
+        if (last > M_PI*2) {
+            if (a > first || a < last-(M_PI*2))
+                break;
+        }
+        else if (a >= first && a <= last)
+            break;
+        first = last;
+        if (first > M_PI*2)
+            first -= M_PI*2;
+    }
+
+         
+         //center this slice upwards
+         float targetAngle = 1.5*M_PI - (last-first)/2.0;
+
+    
+         destAngle += (targetAngle - first);
+         if (destAngle < 0) destAngle += M_PI*2;
+         nextSelectedSlice = slice;
+         selectionYPos = yPos;
+         
+         selectedSlice = nextSelectedSlice;
+         [self setState: STATE_ROTATING];
+}
+         
+- (float) getAngleFromPoint: (CGPoint) point
+{
+    float adjY = yPos;
+     
+    float deltaY = point.y - adjY;
+    float deltaX = point.x - xPos;
+    
+    return atan2(deltaY, deltaX);
+}
 
 
 float easeInOutBack(float t, float b, float c, float d) {
     // t: current time, b: begInnIng value, c: change In value, d: duration
     float s = 1.70158;
-    if ((t/-d/2) < 1) return c/2*(t*t*(((s*-(1.525))+1)*t -s)) + b;
-        return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) +b;
+    if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(1.525))+1)*t - s)) + b;
+    return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
 }
 
 float easeOutBounce(float t, float b, float c, float d) {
@@ -147,7 +219,6 @@ float easeOutBounce(float t, float b, float c, float d) {
         return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
     }
 }
-
 
 + (UIColor *)colorFromHexString:(NSString *)hexString {
     unsigned rgbValue = 0;
