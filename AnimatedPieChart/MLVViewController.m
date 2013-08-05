@@ -25,7 +25,8 @@
 	// Do any additional setup after loading the view, typically from a nib.
     
     pieChartView = [[MLVPieChartView alloc] initWithFrame: self.view.frame];
-                    [self.view addSubview:pieChartView];
+    [self.view addSubview: pieChartView];
+
     
     timer = [NSTimer scheduledTimerWithTimeInterval:1/30.0 target:self selector:@selector(nextFrame) userInfo:NULL repeats:YES];
              
@@ -33,7 +34,7 @@
 
 - (void) nextFrame
 {
-//    [pieChartView tick];
+    [pieChartView tick];
     [pieChartView setNeedsDisplay];
 }
 
@@ -42,5 +43,12 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch *t = [touches anyObject];
+    [pieChartView touchedPoint: [t locationInView: pieChartView]];
+}
+
 
 @end
