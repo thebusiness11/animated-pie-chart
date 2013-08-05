@@ -27,12 +27,14 @@ typedef enum
     state animationState;
     BOOL isAnimating;
     
-    float startAngle;   //starting angle for rotation
-    float destAngle;    //ending angle for rotation
+    float startAngle;       // starting angle for rotation
+    float destAngle;        // ending angle for rotation
     
     MLVPieSlice *selectedSlice;
     MLVPieSlice *nextSelectedSlice;
     float selectionYPos;
+    float selectionRadius;
+    float pieLoweredYPos;
     
     int totalAnimFrames;
     int currentFrame;
@@ -61,7 +63,8 @@ typedef enum
 - (void) setState:(state) newState
 {
     animationState = newState;
-    switch (newState) {
+    switch (newState)
+    {
         case STATE_IDLE:
             isAnimating = NO;
             break;
@@ -72,12 +75,19 @@ typedef enum
             break;
         case STATE_SEPARATING:
             isAnimating = YES;
+            startAngle = rotationAngle = destAngle;
+            totalAnimFrames = 15;
+            currentFrame = 1;
+            pieLoweredYPos = yPos;
+            selectionRadius = radius;
             break;
         case STATE_SEPARATED:
             isAnimating = NO;
             break;
         case STATE_JOINING:
             isAnimating = YES;
+            totalAnimFrames = 15;
+            currentFrame = 1;
             break;
     }
 }
@@ -88,26 +98,51 @@ typedef enum
     {
         case STATE_ROTATING:
             if (currentFrame > totalAnimFrames)
-            {
-                startAngle = rotationAngle = destAngle;
-                [self setState: STATE_IDLE];
-            }
+                [self setState: STATE_SEPARATING];
             else
             {
-                //t:current time b: beginning value c: change in value d: duration
+                // t: current time, b: begInnIng value, c: change In value, d: duration
                 rotationAngle = easeInOutBack(currentFrame++, startAngle, (destAngle - startAngle), totalAnimFrames);
             }
             break;
         case STATE_SEPARATING:
-            
+            if (currentFrame > totalAnimFrames)
+                [self setState: STATE_SEPARATED];
+            else
+            {
+                selectionYPos = easeOutBounce(currentFrame, yPos, -20.0, totalAnimFrames);
+                
+                pieLoweredYPos = easeOutBounce(currentFrame, yPos, 40, totalAnimFrames);
+                
+                selectionRadius = easeOutBounce(currentFrame, radius, 60, totalAnimFrames);
+                
+                currentFrame++;
+            }
             break;
         case STATE_JOINING:
-            
+            if (currentFrame > totalAnimFrames) {
+                selectedSlice = nextSelectedSlice;
+                if (selectedSlice == nil)
+                    [self setState: STATE_IDLE];
+                else
+                    [self setState: STATE_ROTATING];
+            }
+            else
+            {
+                selectionYPos = easeOutBounce(currentFrame, yPos - 20.0, 20.0, totalAnimFrames);
+                
+                pieLoweredYPos = easeOutBounce(currentFrame, yPos+40, -40, totalAnimFrames);
+                
+                selectionRadius = easeOutBounce(currentFrame, radius+60, -60, totalAnimFrames);
+                
+                currentFrame++;
+            }
             break;
         default:
             break;
     }
 }
+
 
 - (void) drawRect:(CGRect)rect
 {
@@ -135,12 +170,19 @@ typedef enum
 - (void) drawPieSlice:(MLVPieSlice *) slice withStartingAngle:(float)startingAngle withContext:(CGContextRef) context
 {
     float endAngle = startingAngle + (slice.pct / 100) * (M_PI*2);
-
+    
     float adjY = yPos;
     float rad = radius;
+    if (slice == selectedSlice)
+    {
+        adjY = selectionYPos;
+        rad = selectionRadius;
+    }
+    else if (selectedSlice != nil && animationState != STATE_ROTATING)
+        adjY = pieLoweredYPos;
     
     CGContextSetFillColorWithColor(context, [MLVPieChartView colorFromHexString: slice.color].CGColor);
-    CGContextSetStrokeColorWithColor(context, [UIColor blackColor].CGColor);
+    CGContextSetStrokeColorWithColor(context,[UIColor blackColor].CGColor);
     CGContextSetLineWidth(context, 1.0);
     
     CGContextBeginPath(context);
@@ -149,6 +191,19 @@ typedef enum
     CGContextClosePath(context);
     
     CGContextDrawPath(context, kCGPathFillStroke);
+    // draw slice percentage
+    CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+    float fontSize = 0.2 * rad;
+    CGContextSelectFont(context, "Helvetica", fontSize, kCGEncodingMacRoman);
+    CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, -1, 0, 0));
+    CGContextSetTextDrawingMode(context, kCGTextFill);
+    char s[100];
+    sprintf(s, "%d%%", (int)slice.pct);
+    
+    float r = rad - 26;
+    float tx = xPos + sinf( M_PI/2 + startingAngle + (endAngle - startingAngle)/2.0 ) * r - 20;
+    float ty = adjY + cosf( M_PI/2 + startingAngle + (endAngle - startingAngle)/2.0) * -r + 10;
+    CGContextShowTextAtPoint(context, tx, ty, s, strlen(s));
 }
 
 - (void) touchedPoint:(CGPoint)point
@@ -193,8 +248,9 @@ typedef enum
 - (float) getAngleFromPoint: (CGPoint) point
 {
     float adjY = yPos;
-     
-    float deltaY = point.y - adjY;
+    if (selectedSlice != nil)
+    adjY = pieLoweredYPos;    float deltaY = point.y - adjY;
+    
     float deltaX = point.x - xPos;
     
     return atan2(deltaY, deltaX);
