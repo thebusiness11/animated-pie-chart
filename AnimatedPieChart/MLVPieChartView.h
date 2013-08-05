@@ -13,6 +13,10 @@
 
 @property MLVPieChart *pieChart;
 
+- (void) tick;
+- (void) touchedPoint: (CGPoint) point;
+- (float) getAngleFromPoint: (CGPoint) point;
+
 + (UIColor *)colorFromHexString:(NSString *)hexString;
 
 @end
