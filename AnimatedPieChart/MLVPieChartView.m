@@ -1,5 +1,5 @@
 //
-//  MLVPieChartView.m
+//  MLVPieChartView.h
 //  AnimatedPieChart
 //
 //  Created by Lance Velasco on 8/4/13.
@@ -7,7 +7,7 @@
 //
 
 #import "MLVPieChartView.h"
-#import "MLVPieSlice.h" 
+#import "MLVPieSlice.h"
 
 typedef enum
 {
@@ -16,11 +16,10 @@ typedef enum
     STATE_SEPARATING,
     STATE_SEPARATED,
     STATE_JOINING
-}   state;
+} state;
 
 
 @implementation MLVPieChartView
-
 {
     float xPos, yPos, radius;
     float rotationAngle;
@@ -53,7 +52,9 @@ typedef enum
         radius = 120;
         rotationAngle = 0;
         startAngle = destAngle = 0;
+        selectionYPos = pieLoweredYPos = yPos;
         nextSelectedSlice = nil;
+        selectionRadius = radius;
         
         [self setState: STATE_IDLE];
     }
@@ -80,6 +81,7 @@ typedef enum
             currentFrame = 1;
             pieLoweredYPos = yPos;
             selectionRadius = radius;
+//            [self notifySelectedSlice: selectedSlice];
             break;
         case STATE_SEPARATED:
             isAnimating = NO;
@@ -88,9 +90,20 @@ typedef enum
             isAnimating = YES;
             totalAnimFrames = 15;
             currentFrame = 1;
+//            [self notifySelectedSlice: nil];
             break;
     }
 }
+//
+//- (void) notifySelectedSlice: (MLVPieSlice *) slice
+//{
+//    NSString *notificationName = @"MLVSliceSelectedNotification";
+//    NSString *key = @"SelectedSlice";
+//    NSDictionary *dictionary = nil;
+//    if (slice)
+//        dictionary = [NSDictionary dictionaryWithObject:slice forKey:key];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil userInfo:dictionary];
+//}
 
 - (void) tick
 {
@@ -144,28 +157,29 @@ typedef enum
 }
 
 
-- (void) drawRect:(CGRect)rect
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect
 {
     // Drawing code
     CGContextRef context = UIGraphicsGetCurrentContext();
     [self drawPieChart: context];
 }
 
-
 - (void) drawPieChart:(CGContextRef) context
 {
-    //clear the screen
+    // clear the screen
     CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
     CGContextFillRect(context, CGRectMake(0, 0, 320, 480));
     
-    //draw all slices
+    // draw all slices
     float a = rotationAngle;
     for (MLVPieSlice *slice in pieChart.slices) {
         [self drawPieSlice:slice withStartingAngle:a withContext:context];
         a += (slice.pct/100) * (M_PI * 2);
     }
+    
 }
-
 
 - (void) drawPieSlice:(MLVPieSlice *) slice withStartingAngle:(float)startingAngle withContext:(CGContextRef) context
 {
@@ -191,6 +205,7 @@ typedef enum
     CGContextClosePath(context);
     
     CGContextDrawPath(context, kCGPathFillStroke);
+    
     // draw slice percentage
     CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
     float fontSize = 0.2 * rad;
@@ -204,22 +219,33 @@ typedef enum
     float tx = xPos + sinf( M_PI/2 + startingAngle + (endAngle - startingAngle)/2.0 ) * r - 20;
     float ty = adjY + cosf( M_PI/2 + startingAngle + (endAngle - startingAngle)/2.0) * -r + 10;
     CGContextShowTextAtPoint(context, tx, ty, s, strlen(s));
+    
 }
 
-- (void) touchedPoint:(CGPoint)point
+- (void) touchedPoint: (CGPoint) point
 {
-    if (isAnimating) return;
+    if (isAnimating)  return;
     
-    float a = [self getAngleFromPoint: point];
+    // join if we touch outside the pie chart
+    float distance = hypotf(point.x - xPos, point.y - yPos);
+    if (distance > radius) {
+        if (animationState == STATE_SEPARATED) {
+            nextSelectedSlice = nil;
+            [self setState: STATE_JOINING];
+        }
+        return;
+    }
+    
+    float a  = [self getAngleFromPoint: point];
     if (a < 0)
         a += 2*M_PI;
     
-    //determine which slice was touched
+    // determine which slice was touched
     float first = startAngle;
-    float last;
+    float last = first;
     MLVPieSlice *slice;
     for (slice in pieChart.slices) {
-        last = first + (slice.pct/100) * (M_PI *2);
+        last = first + (slice.pct/100) * (M_PI * 2);
         if (last > M_PI*2) {
             if (a > first || a < last-(M_PI*2))
                 break;
@@ -230,27 +256,40 @@ typedef enum
         if (first > M_PI*2)
             first -= M_PI*2;
     }
-
-         
-         //center this slice upwards
-         float targetAngle = 1.5*M_PI - (last-first)/2.0;
-
     
-         destAngle += (targetAngle - first);
-         if (destAngle < 0) destAngle += M_PI*2;
-         nextSelectedSlice = slice;
-         selectionYPos = yPos;
-         
-         selectedSlice = nextSelectedSlice;
-         [self setState: STATE_ROTATING];
+    if (slice == selectedSlice) {
+        nextSelectedSlice = nil;
+        [self setState: STATE_JOINING];
+        return;
+    }
+    
+    // center this slice upwards
+    float targetAngle = 1.5*M_PI - (last-first)/2.0;
+    
+    destAngle += (targetAngle - first);
+    if (destAngle < 0)  destAngle += M_PI*2;
+    nextSelectedSlice = slice;
+    selectionYPos = yPos;
+    
+    
+    if (animationState == STATE_SEPARATED) {
+        [self setState: STATE_JOINING];
+    }
+    else {
+        selectedSlice = nextSelectedSlice;
+        [self setState: STATE_ROTATING];
+        
+    }
+    
 }
-         
+
 - (float) getAngleFromPoint: (CGPoint) point
 {
     float adjY = yPos;
     if (selectedSlice != nil)
-    adjY = pieLoweredYPos;    float deltaY = point.y - adjY;
+        adjY = pieLoweredYPos;
     
+    float deltaY = point.y - adjY;
     float deltaX = point.x - xPos;
     
     return atan2(deltaY, deltaX);
@@ -276,12 +315,12 @@ float easeOutBounce(float t, float b, float c, float d) {
     }
 }
 
+
 + (UIColor *)colorFromHexString:(NSString *)hexString {
     unsigned rgbValue = 0;
     NSScanner *scanner = [NSScanner scannerWithString:hexString];
     [scanner scanHexInt:&rgbValue];
-    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:((rgbValue & 0xFF)/255.0) alpha:1.0];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
 }
-
 
 @end
